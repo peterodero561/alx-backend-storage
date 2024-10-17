@@ -28,7 +28,7 @@ BEGIN
         SELECT 
             IFNULL(SUM(c.score * p.weight), 0) AS total_score,
             IFNULL(SUM(p.weight), 0) AS total_weight
-        INTO weighted_avg, total_weight
+        INTO total_score, total_weight
         FROM corrections c
         LEFT JOIN projects p ON c.project_id = p.id
         WHERE c.user_id = userID;
