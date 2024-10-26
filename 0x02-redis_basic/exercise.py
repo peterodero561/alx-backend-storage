@@ -68,3 +68,29 @@ class Cache():
     def get_int(self, key: str) -> Optional[int]:
         '''returns data as int'''
         return self.get(key, int)
+
+
+def replay(method: Callable) -> None:
+    """Display the history of calls for a given function."""
+    # Initialize Redis client to access stored data
+    redis_client = redis.Redis()
+    # Retrieve the function's qualified name to access relevant keys
+    method_name = method.__qualname__
+    input_key = f"{method_name}:inputs"
+    output_key = f"{method_name}:outputs"
+    count_key = method_name
+
+    # Get the total number of calls to the function
+    call_count = int(redis_client.get(count_key) or 0)
+    print(f"{method_name} was called {call_count} times:")
+
+    # Retrieve input and output history
+    inputs = redis_client.lrange(input_key, 0, -1)
+    outputs = redis_client.lrange(output_key, 0, -1)
+
+    # Display each call's input and output in sequence
+    for i, (input_args, output) in enumerate(
+            zip(inputs, outputs), start=1):
+        print(
+                f"{method_name}(*{input_args.decode('utf-8')})
+                -> {output.decode('utf-8')}")
